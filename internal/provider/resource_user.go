@@ -230,8 +230,6 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 	}
 
-	close(stopCh)
-
 	return nil
 }
 
@@ -252,6 +250,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	stopCh := make(chan struct{}, 1)
 	// readyCh communicate when the port forward is ready to get traffic
 	readyCh := make(chan struct{})
+	defer close(stopCh)
 
 	tryPortForwardIfNeeded(ctx, d, meta, stopCh, readyCh, local_port)
 
@@ -324,7 +323,6 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		d.Set(dbPasswordAttr, npass)
 	}
 
-	close(stopCh)
 	d.Partial(false)
 	return diag.Diagnostics{}
 }
@@ -344,6 +342,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	stopCh := make(chan struct{}, 1)
 	// readyCh communicate when the port forward is ready to get traffic
 	readyCh := make(chan struct{})
+	defer close(stopCh)
 
 	tryPortForwardIfNeeded(ctx, d, meta, stopCh, readyCh, local_port)
 
@@ -385,7 +384,6 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	close(stopCh)
 	return diag.Diagnostics{}
 }
 
